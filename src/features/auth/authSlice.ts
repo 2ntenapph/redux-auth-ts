@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { login, fetchUserInfo, verifyEmail } from './authAPI';
+import { login, signup, fetchUserInfo, verifyEmail } from './authAPI';
 import { AuthState, LoginResponse, UserInfo } from './authTypes';
 
 const initialState: AuthState = {
   token: null,
   user: { email: '', role: '', isVerified: false },
   isLoading: false,
-  error: null,
+  error: null, // Should always be a string or null
 };
 
 const authSlice = createSlice({
@@ -16,10 +16,26 @@ const authSlice = createSlice({
     logout(state) {
       state.token = null;
       state.user = { email: '', role: '', isVerified: false };
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
+      // Signup
+      .addCase(signup.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(signup.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null; // Successful signup clears errors
+      })
+      .addCase(signup.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Login
       .addCase(login.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -33,11 +49,33 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
+
+      // Fetch User Info
+      .addCase(fetchUserInfo.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
       .addCase(fetchUserInfo.fulfilled, (state, action: PayloadAction<UserInfo>) => {
+        state.isLoading = false;
         state.user = action.payload;
       })
+      .addCase(fetchUserInfo.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Verify Email
+      .addCase(verifyEmail.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
       .addCase(verifyEmail.fulfilled, (state) => {
+        state.isLoading = false;
         state.user.isVerified = true;
+      })
+      .addCase(verifyEmail.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
   },
 });

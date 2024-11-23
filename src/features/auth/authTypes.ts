@@ -3,6 +3,13 @@ export interface LoginPayload {
     email: string;
     password: string;
   }
+
+  export interface SignupPayload {
+    email: string;
+    password: string;
+    role: string;
+  }
+  
   
   // Login response (received from API)
   export interface LoginResponse {
